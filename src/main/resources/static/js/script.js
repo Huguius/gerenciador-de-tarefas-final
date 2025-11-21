@@ -60,7 +60,8 @@ async function carregarTarefas() {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) {
-            throw new Error('Erro ao carregar as tarefas: ' + response.statusText);
+            // Este bloco lida com erros HTTP 4xx, 5xx
+            throw new Error('Erro HTTP: ' + response.statusText);
         }
         const tarefas = await response.json();
         
@@ -71,8 +72,9 @@ async function carregarTarefas() {
              adicionarEventListeners(); // Adiciona cliques nos botões após a renderização
         }
     } catch (error) {
+        // Este bloco lida com erros de conexão (Backend desligado - Item 1)
         console.error("Erro ao carregar tarefas:", error);
-        TAREFAS_CONTAINER.innerHTML = '<p style="color: red;">Erro ao carregar tarefas. Verifique se o Backend (Spring Boot) está rodando!</p>';
+        TAREFAS_CONTAINER.innerHTML = '<p style="color: red; font-weight: bold;">ERRO DE CONEXÃO: Não foi possível acessar o Backend. Verifique se o Spring Boot está rodando em http://localhost:8080.</p>';
     }
 }
 
@@ -96,12 +98,12 @@ async function excluirTarefa(id) {
         } else if (response.status === 404) {
             alert('Erro: Tarefa não encontrada.');
         } else {
-            alert('Erro ao excluir a tarefa. Tente novamente.');
+            alert('Erro ao excluir a tarefa. Status: ' + response.status);
         }
 
     } catch (error) {
         console.error("Erro na requisição DELETE:", error);
-        alert('Erro de conexão com o servidor.');
+        alert('ERRO DE CONEXÃO: Não foi possível se comunicar com o servidor.');
     }
 }
 
@@ -111,9 +113,12 @@ async function excluirTarefa(id) {
 async function abrirModalAlteracao(id) {
     try {
         const response = await fetch(`${API_URL}/${id}`);
+        
         if (!response.ok) {
-            throw new Error('Tarefa não encontrada!');
+            // Lida com 404 Not Found ou outros erros HTTP
+            throw new Error(`Erro ao buscar a tarefa. Status: ${response.status}`);
         }
+        
         const tarefa = await response.json();
 
         // 1. Preenche o formulário (Requisito: preencher campos com dados atuais)
@@ -128,8 +133,8 @@ async function abrirModalAlteracao(id) {
         MODAL.style.display = 'flex';
 
     } catch (error) {
-        console.error("Erro ao carregar dados para alteração:", error);
-        alert('Não foi possível carregar os dados da tarefa.');
+        console.error("Erro ao abrir modal de alteração:", error);
+        alert('Não foi possível carregar os dados da tarefa para alteração. Verifique o console.');
     }
 }
 
@@ -139,7 +144,6 @@ async function abrirModalAlteracao(id) {
 TAREFA_FORM.addEventListener('submit', async (e) => {
     e.preventDefault();
     
-    // Coleta dados do formulário
     const id = document.getElementById('tarefa-id').value;
     const data = {
         titulo: document.getElementById('titulo').value,
@@ -148,7 +152,6 @@ TAREFA_FORM.addEventListener('submit', async (e) => {
         detalhamento: document.getElementById('detalhamento').value
     };
 
-    // Determina o método e a URL
     const isUpdate = id !== '';
     const method = isUpdate ? 'PUT' : 'POST';
     const url = isUpdate ? `${API_URL}/${id}` : API_URL;
@@ -163,9 +166,9 @@ TAREFA_FORM.addEventListener('submit', async (e) => {
         });
 
         if (response.ok) {
-            alert('Tarefa salva com sucesso!'); // Requisito: mensagem de sucesso
-            MODAL.style.display = 'none'; // Fecha modal
-            carregarTarefas(); // Recarrega a tela com a lista atualizada
+            alert('Tarefa salva com sucesso!');
+            MODAL.style.display = 'none';
+            carregarTarefas();
         } else {
             // Lida com erros de validação (400 Bad Request) do Spring Boot
             const errorData = await response.json();
@@ -173,7 +176,7 @@ TAREFA_FORM.addEventListener('submit', async (e) => {
             
             if (errorData.errors) {
                 // Se houver erros de validação (@NotBlank, @NotNull)
-                errorMessage += '\nCampos inválidos:\n' + errorData.errors.map(err => `- ${err.field}: ${err.defaultMessage}`).join('\n');
+                errorMessage += '\nCampos obrigatórios ou inválidos:\n' + errorData.errors.map(err => `- ${err.field}: ${err.defaultMessage}`).join('\n');
             } else if (errorData.message) {
                  errorMessage += '\n' + errorData.message;
             }
@@ -182,8 +185,9 @@ TAREFA_FORM.addEventListener('submit', async (e) => {
         }
 
     } catch (error) {
+        // Lida com falha de conexão (Backend desligado - Item 1)
         console.error("Erro na submissão do formulário:", error);
-        alert('Erro de conexão ao tentar salvar a tarefa.');
+        alert('ERRO DE CONEXÃO: Não foi possível salvar. Verifique se o Backend (Spring Boot) está rodando!');
     }
 });
 
