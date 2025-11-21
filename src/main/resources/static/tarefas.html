@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Tarefas</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .task-card {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+            border-left: 5px solid #2c3e50; /* Base do seu widget */
+        }
+        .task-card.atrasada {
+            border-left: 5px solid #e74c3c; /* Borda vermelha para atrasada */
+        }
+        .tag-atrasada {
+            background-color: #e74c3c; /* Seu tom de vermelho */
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-left: 10px;
+            float: right;
+        }
+        .task-actions button {
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin-right: 10px;
+        }
+        .delete-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b); /* Excluir em vermelho */
+        }
+        .footer-identificacao {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Gerenciador de Tarefas</h1>
+       <nav>
+            <ul>
+                <li><a href="tarefas.html" class="active">Tarefas</a></li>
+                <li><a href="#" id="logout-btn">Sair</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="container">
+        <div class="header-main">
+            <h2>Lista de Tarefas</h2>
+            <button id="btn-incluir-tarefa">Incluir nova tarefa</button>
+        </div>
+        
+        <section id="lista-tarefas-container">
+            <p>Carregando tarefas...</p>
+        </section>
+    </main>
+    
+    <div id="modal-tarefa" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3 id="modal-title">Incluir Nova Tarefa</h3>
+            <form id="tarefa-form">
+                <input type="hidden" id="tarefa-id">
+                <div class="input-group">
+                    <label for="titulo">Título:</label>
+                    <input type="text" id="titulo" required>
+                </div>
+                <div class="input-group">
+                    <label for="responsavel">Responsável:</label>
+                    <input type="text" id="responsavel" required> 
+                </div>
+                <div class="input-group">
+                    <label for="dataTermino">Data de término:</label>
+                    <input type="date" id="dataTermino" required> 
+                </div>
+                 <div class="input-group">
+                    <label for="detalhamento">Detalhamento:</label>
+                    <textarea id="detalhamento" rows="3"></textarea>
+                </div>
+                <button type="submit" id="btn-salvar">Salvar</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer-identificacao">
+        Gabriel Eiji Shiquedoni / Hugo Rocha Da Silva / TADS 3NB / 2025
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
