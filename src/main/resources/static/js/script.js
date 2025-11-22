@@ -6,6 +6,15 @@ const TAREFA_FORM = document.getElementById('tarefa-form');
 const ADD_TAREFA_BTN = document.getElementById('btn-incluir-tarefa');
 const API_URL = 'http://localhost:8080/api/tarefas';
 
+// NOVOS ELEMENTOS DO MODAL DE CONFIRMAÇÃO
+const CONFIRM_MODAL = document.getElementById('confirm-modal');
+const CONFIRM_MESSAGE = document.getElementById('confirm-message');
+const BTN_CONFIRM_YES = document.getElementById('btn-confirm-yes');
+const BTN_CONFIRM_NO = document.getElementById('btn-confirm-no');
+
+// Variável global temporária para armazenar o ID da tarefa a ser excluída
+let tarefaIdParaExcluir = null;
+
 // --- Funções Auxiliares de Formato e Visual ---
 
 /**
@@ -72,37 +81,54 @@ async function carregarTarefas() {
              adicionarEventListeners(); // Adiciona cliques nos botões após a renderização
         }
     } catch (error) {
-        // Este bloco lida com erros de conexão (Backend desligado - Item 1)
+        // Este bloco lida com erros de conexão (Backend desligado)
         console.error("Erro ao carregar tarefas:", error);
         TAREFAS_CONTAINER.innerHTML = '<p style="color: red; font-weight: bold;">ERRO DE CONEXÃO: Não foi possível acessar o Backend. Verifique se o Spring Boot está rodando em http://localhost:8080.</p>';
     }
 }
 
+// FUNÇÕES DO MODAL DE CONFIRMAÇÃO CUSTOMIZADO
+
 /**
- * Envia uma requisição DELETE para a API e remove a tarefa.
+ * Abre o modal de confirmação, definindo o ID da tarefa a ser excluída.
  */
-async function excluirTarefa(id) {
-    // Requisito: Caixa de Confirmação
-    if (!confirm(`Deseja excluir a tarefa ID ${id}?`)) { 
-        return; 
-    }
+function abrirModalConfirmacao(id, titulo) {
+    tarefaIdParaExcluir = id;
+    CONFIRM_MESSAGE.textContent = `Deseja excluir a tarefa "${titulo}" (ID ${id})?`;
+    CONFIRM_MODAL.style.display = 'flex';
+}
+
+/**
+ * Fecha o modal de confirmação e limpa a variável de ID.
+ */
+function fecharModalConfirmacao() {
+    tarefaIdParaExcluir = null;
+    CONFIRM_MODAL.style.display = 'none';
+}
+
+/**
+ * Envia a requisição DELETE para a API após a confirmação.
+ */
+async function confirmarExclusao() {
+    if (!tarefaIdParaExcluir) return;
 
     try {
-        const response = await fetch(`${API_URL}/${id}`, {
+        const response = await fetch(`${API_URL}/${tarefaIdParaExcluir}`, {
             method: 'DELETE',
         });
 
-        if (response.status === 204) { // Sucesso na exclusão
-            alert(`Tarefa ID ${id} excluída com sucesso!`);
+        fecharModalConfirmacao(); // Fecha o modal imediatamente
+
+        if (response.status === 204) {
+            alert(`Tarefa ID ${tarefaIdParaExcluir} excluída com sucesso!`);
             carregarTarefas(); // Recarrega a lista
-        } else if (response.status === 404) {
-            alert('Erro: Tarefa não encontrada.');
         } else {
             alert('Erro ao excluir a tarefa. Status: ' + response.status);
         }
 
     } catch (error) {
         console.error("Erro na requisição DELETE:", error);
+        fecharModalConfirmacao();
         alert('ERRO DE CONEXÃO: Não foi possível se comunicar com o servidor.');
     }
 }
@@ -115,7 +141,6 @@ async function abrirModalAlteracao(id) {
         const response = await fetch(`${API_URL}/${id}`);
         
         if (!response.ok) {
-            // Lida com 404 Not Found ou outros erros HTTP
             throw new Error(`Erro ao buscar a tarefa. Status: ${response.status}`);
         }
         
@@ -185,7 +210,7 @@ TAREFA_FORM.addEventListener('submit', async (e) => {
         }
 
     } catch (error) {
-        // Lida com falha de conexão (Backend desligado - Item 1)
+        // Lida com falha de conexão (Backend desligado)
         console.error("Erro na submissão do formulário:", error);
         alert('ERRO DE CONEXÃO: Não foi possível salvar. Verifique se o Backend (Spring Boot) está rodando!');
     }
@@ -198,11 +223,17 @@ TAREFA_FORM.addEventListener('submit', async (e) => {
  * Adiciona escutadores de eventos de clique para os botões (Excluir e Alterar).
  */
 function adicionarEventListeners() {
-    // Escutador para Botões de Exclusão
+    // Escutador para Botões de Exclusão (ABRE O NOVO MODAL)
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.onclick = (e) => {
             const id = e.target.getAttribute('data-id');
-            excluirTarefa(id);
+            // Busca o título para uma mensagem mais amigável
+            const card = e.target.closest('.task-card');
+            const tituloText = card ? card.querySelector('h3').textContent : `ID ${id}`;
+            // Remove a tag "ATRASADA" se existir
+            const titulo = tituloText.replace('ATRASADA', '').trim();
+            
+            abrirModalConfirmacao(id, titulo);
         };
     });
     
@@ -216,7 +247,14 @@ function adicionarEventListeners() {
 }
 
 /**
- * Abre o modal para inclusão de nova tarefa (reseta o formulário).
+ * Lógica do Modal de Confirmação
+ */
+BTN_CONFIRM_YES.addEventListener('click', confirmarExclusao);
+BTN_CONFIRM_NO.addEventListener('click', fecharModalConfirmacao);
+
+
+/**
+ * Lógica do Modal de Inclusão/Alteração
  */
 ADD_TAREFA_BTN.onclick = () => {
     MODAL_TITLE.textContent = 'Incluir Nova Tarefa';
@@ -226,12 +264,14 @@ ADD_TAREFA_BTN.onclick = () => {
 };
 
 /**
- * Fecha o modal ao clicar no 'X' ou fora dele.
+ * Fecha os Modais ao clicar no 'X' ou fora dele.
  */
 document.querySelector('.close-btn').onclick = () => { MODAL.style.display = 'none'; };
 window.onclick = (event) => {
     if (event.target == MODAL) {
         MODAL.style.display = 'none';
+    } else if (event.target == CONFIRM_MODAL) {
+        fecharModalConfirmacao();
     }
 };
 

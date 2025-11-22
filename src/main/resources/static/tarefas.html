@@ -5,47 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gerenciador de Tarefas</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        .task-card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
-            border-left: 5px solid #2c3e50; /* Base do seu widget */
-        }
-        .task-card.atrasada {
-            border-left: 5px solid #e74c3c; /* Borda vermelha para atrasada */
-        }
-        .tag-atrasada {
-            background-color: #e74c3c; /* Seu tom de vermelho */
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-left: 10px;
-            float: right;
-        }
-        .task-actions button {
-            padding: 8px 15px;
-            font-size: 0.9rem;
-            margin-right: 10px;
-        }
-        .delete-btn {
-            background: linear-gradient(45deg, #e74c3c, #c0392b); /* Excluir em vermelho */
-        }
-        .footer-identificacao {
-            background-color: #2c3e50;
-            color: #ecf0f1;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            font-size: 0.8rem;
-        }
-    </style>
 </head>
 <body>
     <header>
@@ -91,6 +50,17 @@
                 </div>
                 <button type="submit" id="btn-salvar">Salvar</button>
             </form>
+        </div>
+    </div>
+    
+    <div id="confirm-modal" class="modal">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <h3 style="margin-bottom: 20px;">Confirmação</h3>
+            <p id="confirm-message" style="font-size: 1.1rem; margin-bottom: 30px;">Deseja excluir a tarefa?</p>
+            <div style="display: flex; justify-content: space-around;">
+                <button id="btn-confirm-yes" type="button" class="delete-btn" style="width: 120px; border-radius: 5px;">SIM</button>
+                <button id="btn-confirm-no" type="button" style="background: #ccc; color: #333; width: 120px; border-radius: 5px;">NÃO</button>
+            </div>
         </div>
     </div>
 
