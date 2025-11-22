@@ -26,11 +26,8 @@ public class Tarefa {
 
     private String detalhamento;
 
-    // Construtor vazio para o JPA
     public Tarefa() {
     }
-
-    // Getters e Setters (Necessários para JPA, Jackson e manipulação de dados)
 
     public Long getId() {
         return id;
