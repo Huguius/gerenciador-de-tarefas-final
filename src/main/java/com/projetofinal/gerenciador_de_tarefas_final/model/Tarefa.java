@@ -6,6 +6,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 import java.time.LocalDate;
 
 @Entity
@@ -16,9 +18,11 @@ public class Tarefa {
     private Long id;
 
     @NotBlank(message = "O título é obrigatório")
+    @Pattern(regexp = ".*\\p{L}.*", message = "O título deve conter pelo menos uma letra")
     private String titulo;
 
     @NotBlank(message = "O responsável é obrigatório")
+    @Pattern(regexp = ".*\\p{L}.*", message = "O responsável deve conter pelo menos uma letra")
     private String responsavel;
 
     @NotNull(message = "A data de término é obrigatória")
